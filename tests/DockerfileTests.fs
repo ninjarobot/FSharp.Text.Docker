@@ -54,3 +54,28 @@ let ``RUN exec with args`` () =
 let ``RUN exec with quotes in args`` () =
     let instruction = Run (Exec ("apt-get", ["install"; "-y"; """something"quoted with \ slashes / in it"""])) |> printInstruction
     Assert.Equal ("""RUN ["apt-get","install","-y","something\"quoted with \\ slashes \/ in it"]""", instruction)
+
+[<Fact>]
+let ``RUN shell command`` () =
+    let instruction = Run (ShellCommand ("apt-get install -y wget")) |> printInstruction
+    Assert.Equal ("""RUN apt-get install -y wget""", instruction)
+
+[<Fact>]
+let ``CMD exec no args`` () =
+    let instruction = Cmd (Exec ("mono", [])) |> printInstruction
+    Assert.Equal ("""CMD ["mono"]""", instruction)
+
+[<Fact>]
+let ``CMD exec with args`` () =
+    let instruction = Cmd (Exec ("mono", ["myapp.exe"; "--someoption"])) |> printInstruction
+    Assert.Equal ("""CMD ["mono","myapp.exe","--someoption"]""", instruction)
+
+[<Fact>]
+let ``CMD exec with quotes in args`` () =
+    let instruction = Cmd (Exec ("mono", ["myapp.exe"; """something"quoted with \ slashes / in it"""])) |> printInstruction
+    Assert.Equal ("""CMD ["mono","myapp.exe","something\"quoted with \\ slashes \/ in it"]""", instruction)
+
+[<Fact>]
+let ``CMD shell command`` () =
+    let instruction = Cmd (ShellCommand ("mono myapp.exe --someoption")) |> printInstruction
+    Assert.Equal ("CMD mono myapp.exe --someoption", instruction)
