@@ -1,4 +1,4 @@
-module Tests
+module DockerfileTests
 
 open System
 open Xunit
@@ -24,3 +24,18 @@ let ``Build a dockerfile`` () =
         ]
     let dockerfileLines = dockerfile.Split(Environment.NewLine)
     expected |> List.iteri (fun idx line -> Assert.Equal (line, dockerfileLines.[idx]))
+
+[<Fact>]
+let ``FROM with image only`` () =
+    let instruction = From ("debian", None, None) |> printInstruction
+    Assert.Equal ("FROM debian", instruction)
+
+[<Fact>]
+let ``FROM with image and tag`` () =
+    let instruction = From ("debian", Some("stretch"), None) |> printInstruction
+    Assert.Equal ("FROM debian:stretch", instruction)
+
+[<Fact>]
+let ``FROM with named image and tag`` () =
+    let instruction = From ("debian", Some("stretch"), Some("deb-stretch")) |> printInstruction
+    Assert.Equal ("FROM debian:stretch AS deb-stretch", instruction)
