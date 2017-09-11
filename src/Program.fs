@@ -64,7 +64,7 @@ module Dockerfile =
             | _ -> 
                 args
                 |> List.map (sprintf "\"%s\"") // pad with quotes
-                |> String.concat "," // put commas between quoted args
+                |> String.concat ", " // put commas between quoted args
                 |> sprintf """RUN ["%s", %s]""" executable // and append to RUN
         | Cmd (ShellCommand (command)) -> sprintf "CMD %s" command
         | Cmd (Exec (executable, args)) -> 
@@ -73,7 +73,7 @@ module Dockerfile =
             | _ -> 
                 args
                 |> List.map (sprintf "\"%s\"") // pad with quotes
-                |> String.concat "," // put commas between quoted args
+                |> String.concat ", " // put commas between quoted args
                 |> sprintf """CMD ["%s", %s]""" executable // and append to CMD
         | CmdArgs(args) ->
             args
@@ -106,10 +106,10 @@ module Program =
     [<EntryPoint>]
     let main argv =
         [
-            From ("stretch", Some("slim"), None)
-            Run (Exec ("ls", ["-l"]))
-            Run (Exec ("du", ["-h"]))
-            Cmd (ShellCommand ("echo \"hello there $USER\""))
+            From ("debian", Some("stretch-slim"), None)
+            Run (Exec ("apt-get", ["update"]))
+            Run (Exec ("apt-get", ["install"; "-y"; "wget"]))
+            Cmd (ShellCommand ("wget https://github.com/fsharp/fsharp/archive/4.1.25.tar.gz"))
         ]
         |> Dockerfile.buildDockerfile
         |> printfn "%A"
