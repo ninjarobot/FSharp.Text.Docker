@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix>alpha</VersionSuffix>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dockerfile.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FParsec" Version="1.0.3" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
   </ItemGroup>
 </Project>
