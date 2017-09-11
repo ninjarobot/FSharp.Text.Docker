@@ -48,6 +48,13 @@ module Dockerfile =
         | Stopsignal of Signal
         | Shell of Executable:string * Parameters:string list
         | Healthcheck of Healthcheck
+
+    let private stringsToJsonArray (strings:string list) =
+        use ms = new System.IO.MemoryStream ()
+        let arrStr = strings |> Array.ofList
+        let serializer = System.Runtime.Serialization.Json.DataContractJsonSerializer (typedefof<string []>)
+        serializer.WriteObject (ms, arrStr)
+        System.Text.Encoding.UTF8.GetString (ms.ToArray ())
     
     let printInstruction (instruction:Instruction) =
         match instruction with
@@ -57,27 +64,12 @@ module Dockerfile =
         | From (img, None, None) -> sprintf "FROM %s" img
         | Run (ShellCommand (command)) -> sprintf "RUN %s" command
         | Run (Exec (executable, args)) -> 
-            match args with
-            | [] -> sprintf """RUN ["%s"]""" executable
-            | _ -> 
-                args
-                |> List.map (sprintf "\"%s\"") // pad with quotes
-                |> String.concat ", " // put commas between quoted args
-                |> sprintf """RUN ["%s", %s]""" executable // and append to RUN
+            sprintf "RUN %s" (executable::args |> stringsToJsonArray)
         | Cmd (ShellCommand (command)) -> sprintf "CMD %s" command
         | Cmd (Exec (executable, args)) -> 
-            match args with
-            | [] -> sprintf """CMD ["%s"]""" executable
-            | _ -> 
-                args
-                |> List.map (sprintf "\"%s\"") // pad with quotes
-                |> String.concat ", " // put commas between quoted args
-                |> sprintf """CMD ["%s", %s]""" executable // and append to CMD
+            sprintf "CMD %s" (executable::args |> stringsToJsonArray)
         | CmdArgs(args) ->
-            args
-            |> List.map (sprintf "\"%s\"") // pad with quotes
-            |> String.concat "," // put commas between quoted args
-            |> sprintf """CMD [%s]""" // and append to CMD
+            sprintf "CMD %s" (args |> stringsToJsonArray)
         | Label(_) -> failwith "Not Implemented"
         | Expose(ports) -> failwith "Not Implemented"
         | Env(_) -> failwith "Not Implemented"
