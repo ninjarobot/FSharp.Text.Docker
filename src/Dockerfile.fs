@@ -56,6 +56,12 @@ module Dockerfile =
         serializer.WriteObject (ms, arrStr)
         System.Text.Encoding.UTF8.GetString (ms.ToArray ())
     
+    let private stringContainsWhitepace (s:string) =
+        if isNull (s) then
+            false
+        else
+            System.Linq.Enumerable.Any(s, fun c -> System.Char.IsWhiteSpace(c))
+
     let printInstruction (instruction:Instruction) =
         match instruction with
         | From (img, Some (tag), Some(name)) -> sprintf "FROM %s:%s AS %s" img tag name
@@ -68,12 +74,33 @@ module Dockerfile =
         | Cmd (ShellCommand (command)) -> sprintf "CMD %s" command
         | Cmd (Exec (executable, args)) -> 
             sprintf "CMD %s" (executable::args |> stringsToJsonArray)
-        | CmdArgs(args) ->
+        | CmdArgs (args) ->
             sprintf "CMD %s" (args |> stringsToJsonArray)
-        | Label(_) -> failwith "Not Implemented"
-        | Expose(ports) -> failwith "Not Implemented"
-        | Env(_) -> failwith "Not Implemented"
-        | Add(_) -> failwith "Not Implemented"
+        | Label (KeyValuePair (key, value)) ->
+            sprintf "LABEL %s=%s" key value
+        | Label (Dictionary (map)) ->
+            map
+            |> Seq.map (fun kv -> sprintf "%s=%s" kv.Key kv.Value)
+            |> String.concat " "
+            |> sprintf "LABEL %s"
+        | Expose (ports) ->
+            ports
+            |> List.map (sprintf "%d")
+            |> String.concat " "
+            |> sprintf "EXPOSE %s"
+        | Env (KeyValuePair (key, value)) ->
+            sprintf "ENV %s %s" key value
+        | Env (Dictionary (map)) ->
+            map
+            |> Seq.map (fun kv -> sprintf "%s=%s" kv.Key kv.Value)
+            |> String.concat " "
+            |> sprintf "ENV %s"
+        | Add(SingleSource(source, dest)) ->
+            if source |> stringContainsWhitepace || dest |> stringContainsWhitepace then
+                sprintf """ADD ["%s", "%s"]""" source dest
+            else
+                sprintf "ADD %s %s" source dest
+        | Add(MultipleSources(sources, dest)) -> failwith "Not Implemented"
         | Copy(source, destination, from) -> failwith "Not Implemented"
         | Entrypoint(_) -> failwith "Not Implemented"
         | Volume(_) -> failwith "Not Implemented"
