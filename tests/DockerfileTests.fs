@@ -187,5 +187,30 @@ let ``ENTRYPOINT shell command`` () =
 
 [<Fact>]
 let ``VOLUME single path`` () =
-    let instruction = Volume(["test"]) |> printInstruction
+    let instruction = Volume (["test"]) |> printInstruction
     Assert.Equal ("""VOLUME ["test"]""", instruction)
+
+[<Fact>]
+let ``USER no group`` () =
+    let instruction = User ("foo", None) |> printInstruction
+    Assert.Equal ("USER foo", instruction)
+
+[<Fact>]
+let ``USER with group`` () =
+    let instruction = User ("foo", Some("bar")) |> printInstruction
+    Assert.Equal ("USER foo:bar", instruction)
+
+[<Fact>]
+let ``WORKDIR with path`` () =
+    let instruction = WorkDir ("path/to/dir") |> printInstruction
+    Assert.Equal ("WORKDIR path/to/dir", instruction)
+
+[<Fact>]
+let ``ARG with default`` () =
+    let instruction = Arg ("user1", Some ("someuser")) |> printInstruction
+    Assert.Equal ("ARG user1=someuser", instruction)
+
+[<Fact>]
+let ``ARG without default`` () =
+    let instruction = Arg ("buildno", None) |> printInstruction
+    Assert.Equal ("ARG buildno", instruction)

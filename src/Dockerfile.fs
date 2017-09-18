@@ -127,11 +127,18 @@ module Dockerfile =
             sprintf "ENTRYPOINT %s" (executable::args |> stringsToQuotedArray)
         | Entrypoint (ShellCommand (command)) ->
             sprintf "ENTRYPOINT %s" command
-        | Volume(paths) ->
+        | Volume (paths) ->
             paths |> stringsToQuotedArray |> sprintf "VOLUME %s"
-        | User(username, group) -> failwith "Not Implemented"
-        | WorkDir(_) -> failwith "Not Implemented"
-        | Arg(name, ``default``) -> failwith "Not Implemented"
+        | User (username, None) ->
+            sprintf "USER %s" username
+        | User (username, Some(group)) ->
+            sprintf "USER %s:%s" username group
+        | WorkDir (path) ->
+            sprintf "WORKDIR %s" path
+        | Arg (name, None) ->
+            sprintf "ARG %s" name
+        | Arg (name, Some(dflt)) ->
+            sprintf "ARG %s=%s" name dflt
         | Onbuild(_) -> failwith "Not Implemented"
         | Stopsignal(_) -> failwith "Not Implemented"
         | Shell(executable, parameters) -> failwith "Not Implemented"
