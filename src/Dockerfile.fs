@@ -65,7 +65,7 @@ module Dockerfile =
         else
             System.Linq.Enumerable.Any(s, fun c -> System.Char.IsWhiteSpace(c))
 
-    let printInstruction (instruction:Instruction) =
+    let rec printInstruction (instruction:Instruction) =
         match instruction with
         | From (img, Some (tag), Some(name)) -> sprintf "FROM %s:%s AS %s" img tag name
         | From (img, None, Some(name)) -> sprintf "FROM %s AS %s" img name
@@ -139,7 +139,8 @@ module Dockerfile =
             sprintf "ARG %s" name
         | Arg (name, Some(dflt)) ->
             sprintf "ARG %s=%s" name dflt
-        | Onbuild(_) -> failwith "Not Implemented"
+        | Onbuild(instruction) ->
+            instruction |> printInstruction |> sprintf "ONBUILD %s"
         | Stopsignal(_) -> failwith "Not Implemented"
         | Shell(executable, parameters) -> failwith "Not Implemented"
         | Healthcheck(_) -> failwith "Not Implemented"

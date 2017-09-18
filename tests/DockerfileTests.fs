@@ -214,3 +214,8 @@ let ``ARG with default`` () =
 let ``ARG without default`` () =
     let instruction = Arg ("buildno", None) |> printInstruction
     Assert.Equal ("ARG buildno", instruction)
+
+[<Fact>]
+let ``ONBUILD with ADD`` () =
+    let instruction = Onbuild (Add (SingleSource ("."), "/app/src" ) ) |> printInstruction
+    Assert.Equal ("ONBUILD ADD . /app/src", instruction)
