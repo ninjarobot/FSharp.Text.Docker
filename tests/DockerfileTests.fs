@@ -117,20 +117,75 @@ let ``ENV from dictionary`` () =
 
 [<Fact>]
 let ``ADD single source no whitespace`` () =
-    let instruction = Add (SingleSource ("path/to/source", "/dest/in/image")) |> printInstruction
+    let instruction = Add (SingleSource ("path/to/source"), "/dest/in/image") |> printInstruction
     Assert.Equal ("ADD path/to/source /dest/in/image", instruction)
 
 [<Fact>]
+let ``ADD multiple sources no whitespace`` () =
+    let instruction = Add (MultipleSources (["path/to/source"; "some/other/source"]), "/dest/in/image") |> printInstruction
+    Assert.Equal ("ADD path/to/source some/other/source /dest/in/image", instruction)
+
+[<Fact>]
 let ``ADD single source with whitespace`` () =
-    let instruction = Add (SingleSource ("path to/source", "/dest/in/image")) |> printInstruction
+    let instruction = Add (SingleSource ("path to/source"), "/dest/in/image") |> printInstruction
     Assert.Equal ("""ADD ["path to/source", "/dest/in/image"]""", instruction)
 
 [<Fact>]
+let ``ADD multiple sources with whitespace`` () =
+    let instruction = Add (MultipleSources (["path to/source"; "some/other source"]), "/dest/in/image") |> printInstruction
+    Assert.Equal ("""ADD ["path to/source", "some/other source", "/dest/in/image"]""", instruction)
+
+[<Fact>]
 let ``ADD single source to destination with whitespace`` () =
-    let instruction = Add (SingleSource ("path/to/source", "/dest/in image")) |> printInstruction
+    let instruction = Add (SingleSource ("path/to/source"), "/dest/in image") |> printInstruction
     Assert.Equal ("""ADD ["path/to/source", "/dest/in image"]""", instruction)
 
 [<Fact>]
 let ``ADD single source with whitepace to destination with whitespace`` () =
-    let instruction = Add (SingleSource ("path to source", "/dest in image")) |> printInstruction
+    let instruction = Add (SingleSource ("path to source"), "/dest in image") |> printInstruction
     Assert.Equal ("""ADD ["path to source", "/dest in image"]""", instruction)
+
+[<Fact>]
+let ``COPY single source no whitespace`` () =
+    let instruction = Copy (SingleSource ("path/to/source"), "/dest/in/image", None) |> printInstruction
+    Assert.Equal ("COPY path/to/source /dest/in/image", instruction)
+
+[<Fact>]
+let ``COPY multiple sources no whitespace`` () =
+    let instruction = Copy (MultipleSources (["path/to/source"; "some/other/source"]), "/dest/in/image", None) |> printInstruction
+    Assert.Equal ("COPY path/to/source some/other/source /dest/in/image", instruction)
+
+[<Fact>]
+let ``COPY single source with whitespace`` () =
+    let instruction = Copy (SingleSource ("path to/source"), "/dest/in/image", None) |> printInstruction
+    Assert.Equal ("""COPY ["path to/source", "/dest/in/image"]""", instruction)
+
+[<Fact>]
+let ``COPY multiple sources with whitespace`` () =
+    let instruction = Copy (MultipleSources (["path to/source"; "some/other source"]), "/dest/in/image", None) |> printInstruction
+    Assert.Equal ("""COPY ["path to/source", "some/other source", "/dest/in/image"]""", instruction)
+
+[<Fact>]
+let ``ENTRYPOINT exec no args`` () =
+    let instruction = Entrypoint (Exec ("/bin/bash", [])) |> printInstruction
+    Assert.Equal ("""ENTRYPOINT ["/bin/bash"]""", instruction)
+
+[<Fact>]
+let ``ENTRYPOINT exec with args`` () =
+    let instruction = Entrypoint (Exec ("bash", ["-c"; "ls"])) |> printInstruction
+    Assert.Equal ("""ENTRYPOINT ["bash", "-c", "ls"]""", instruction)
+
+[<Fact>]
+let ``ENTRYPOINT exec with quotes in args`` () =
+    let instruction = Entrypoint (Exec ("bash", ["-c"; "'echo \"hello world\"'"])) |> printInstruction
+    Assert.Equal ("""ENTRYPOINT ["bash", "-c", "'echo "hello world"'"]""", instruction)
+
+[<Fact>]
+let ``ENTRYPOINT shell command`` () =
+    let instruction = Entrypoint (ShellCommand ("bash -c ls")) |> printInstruction
+    Assert.Equal ("""ENTRYPOINT bash -c ls""", instruction)
+
+[<Fact>]
+let ``VOLUME single path`` () =
+    let instruction = Volume(["test"]) |> printInstruction
+    Assert.Equal ("""VOLUME ["test"]""", instruction)

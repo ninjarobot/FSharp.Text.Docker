@@ -10,9 +10,9 @@ module Dockerfile =
         | KeyValuePair of Key:string * Value:string
         | Dictionary of Map<string,string>
 
-    type Add =
-        | SingleSource of Source:string * Destination:string
-        | MultipleSources of Source:string list * Destination:string
+    type Source =
+        | SingleSource of Source:string
+        | MultipleSources of Source:string list
 
     type BuildStage = 
         | Name of string
@@ -37,8 +37,8 @@ module Dockerfile =
         | Label of KeyVal
         | Expose of Ports:uint16 list
         | Env of KeyVal
-        | Add of Add
-        | Copy of Source:string * Destination:string * From:BuildStage option
+        | Add of Source * Destination:string
+        | Copy of Source * Destination:string * From:BuildStage option
         | Entrypoint of Command
         | Volume of string list
         | User of Username:string * Group:string option
@@ -55,6 +55,9 @@ module Dockerfile =
         let serializer = System.Runtime.Serialization.Json.DataContractJsonSerializer (typedefof<string []>)
         serializer.WriteObject (ms, arrStr)
         System.Text.Encoding.UTF8.GetString (ms.ToArray ())
+
+    let private stringsToQuotedArray (strings:string list) =
+        strings |> List.map (sprintf "\"%s\"") |> String.concat ", " |> sprintf "[%s]"
     
     let private stringContainsWhitepace (s:string) =
         if isNull (s) then
@@ -95,15 +98,37 @@ module Dockerfile =
             |> Seq.map (fun kv -> sprintf "%s=%s" kv.Key kv.Value)
             |> String.concat " "
             |> sprintf "ENV %s"
-        | Add(SingleSource(source, dest)) ->
+        | Add (SingleSource (source), dest) ->
             if source |> stringContainsWhitepace || dest |> stringContainsWhitepace then
-                sprintf """ADD ["%s", "%s"]""" source dest
+                [source; dest] |> stringsToQuotedArray
+                |> sprintf "ADD %s"
             else
                 sprintf "ADD %s %s" source dest
-        | Add(MultipleSources(sources, dest)) -> failwith "Not Implemented"
-        | Copy(source, destination, from) -> failwith "Not Implemented"
-        | Entrypoint(_) -> failwith "Not Implemented"
-        | Volume(_) -> failwith "Not Implemented"
+        | Add (MultipleSources (sources), dest) ->
+            if sources |> List.exists(stringContainsWhitepace) || dest |> stringContainsWhitepace then
+                sources@[dest] |> stringsToQuotedArray
+                |> sprintf "ADD %s"
+            else
+                sprintf "ADD %s %s" (sources |> String.concat " ") dest
+        | Copy (SingleSource (source), dest, from) ->
+            if source |> stringContainsWhitepace || dest |> stringContainsWhitepace then
+                [source; dest] |> stringsToQuotedArray
+                |> sprintf "COPY %s"
+            else
+                sprintf "COPY %s %s" source dest
+        | Copy (MultipleSources (sources), dest, from) ->
+            if sources |> List.exists(stringContainsWhitepace) || dest |> stringContainsWhitepace then
+                sources@[dest] |> stringsToQuotedArray
+                |> sprintf "COPY %s"
+            else
+                sources@[dest] |> String.concat " "
+                |> sprintf "COPY %s"
+        | Entrypoint (Exec (executable, args)) -> 
+            sprintf "ENTRYPOINT %s" (executable::args |> stringsToQuotedArray)
+        | Entrypoint (ShellCommand (command)) ->
+            sprintf "ENTRYPOINT %s" command
+        | Volume(paths) ->
+            paths |> stringsToQuotedArray |> sprintf "VOLUME %s"
         | User(username, group) -> failwith "Not Implemented"
         | WorkDir(_) -> failwith "Not Implemented"
         | Arg(name, ``default``) -> failwith "Not Implemented"
