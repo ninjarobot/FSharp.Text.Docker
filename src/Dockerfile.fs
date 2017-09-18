@@ -24,8 +24,18 @@ module Dockerfile =
         | Sigkill
         | Number of uint8
 
+    type Duration = 
+        | Seconds of uint32
+        | Minutes of uint32
+
+    type HealthcheckOption =
+        | Interval of Duration
+        | Timeout of Duration
+        | StartPeriod of Duration
+        | Retries of uint32
+
     type Healthcheck =
-        | HealthcheckCmd of Cmd:string * Interval:uint32 option * Timeout:uint32 option * StartPertion:uint32 option * Retries:uint32 option
+        | HealthcheckCmd of Cmd:Command * HealthcheckOption list
         | HealthcheckNone
 
     type Instruction =
@@ -139,12 +149,36 @@ module Dockerfile =
             sprintf "ARG %s" name
         | Arg (name, Some(dflt)) ->
             sprintf "ARG %s=%s" name dflt
-        | Onbuild(instruction) ->
+        | Onbuild (instruction) ->
             instruction |> printInstruction |> sprintf "ONBUILD %s"
-        | Stopsignal(_) -> failwith "Not Implemented"
-        | Shell(executable, parameters) -> failwith "Not Implemented"
-        | Healthcheck(_) -> failwith "Not Implemented"
-
+        | Stopsignal (signal) ->
+            match signal with
+            | Sigint -> "STOPSIGNAL SIGINT"
+            | Sigquit -> "STOPSIGNAL SIGQUIT"
+            | Sigkill -> "STOPSIGNAL SIGKILL"
+            | Number n -> sprintf "STOPSIGNAL %i" n
+        | Healthcheck ( HealthcheckCmd (command, options)) ->
+            let printDuration duration = 
+                match duration with
+                | Seconds n -> sprintf "%is" n
+                | Minutes n -> sprintf "%im" n
+            let allOptions =
+                options |> List.map (fun opt ->
+                    match opt with
+                    | Interval (duration) -> duration |> printDuration |> sprintf "--interval=%s "
+                    | Timeout (duration) -> duration |> printDuration |> sprintf "--timeout=%s "
+                    | StartPeriod (duration) -> duration |> printDuration |> sprintf "--start-period=%s "
+                    | Retries (quantity) -> sprintf "--retries=%i " quantity
+                )
+                |> String.concat ""
+            let cmdInstruction = command |> Cmd |> printInstruction
+            sprintf "HEALTHCHECK %s%s" allOptions cmdInstruction
+        | Healthcheck (HealthcheckNone) ->
+            "HEALTHCHECK NONE"
+        | Shell (executable, parameters) ->
+            executable::parameters |> stringsToQuotedArray
+            |> sprintf "SHELL %s"
+        
     /// Concatenates a list of Dockerfile instructions into a single Dockerfile
     let buildDockerfile (instructions:Instruction list) =
         instructions |> List.map (printInstruction) |> String.concat System.Environment.NewLine

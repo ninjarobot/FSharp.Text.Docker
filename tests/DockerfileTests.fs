@@ -219,3 +219,38 @@ let ``ARG without default`` () =
 let ``ONBUILD with ADD`` () =
     let instruction = Onbuild (Add (SingleSource ("."), "/app/src" ) ) |> printInstruction
     Assert.Equal ("ONBUILD ADD . /app/src", instruction)
+
+[<Fact>]
+let ``STOPSIGNAL with named signal`` () =
+    let instruction = Stopsignal (Sigkill) |> printInstruction
+    Assert.Equal ("STOPSIGNAL SIGKILL", instruction)
+
+[<Fact>]
+let ``STOPSIGNAL with numeric`` () =
+    let instruction = Stopsignal (Number (9uy)) |> printInstruction
+    Assert.Equal ("STOPSIGNAL 9", instruction)
+
+[<Fact>]
+let ``HEALTHCHECK without options`` () =
+    let instruction = Healthcheck (HealthcheckCmd (ShellCommand ("ping -c 2 8.8.8.8"), [])) |> printInstruction
+    Assert.Equal ("HEALTHCHECK CMD ping -c 2 8.8.8.8", instruction)
+
+[<Fact>]
+let ``HEALTHCHECK with one option`` () =
+    let instruction = Healthcheck (HealthcheckCmd (ShellCommand ("ping -c 2 8.8.8.8"), [1u |> Minutes |> Interval])) |> printInstruction
+    Assert.Equal ("HEALTHCHECK --interval=1m CMD ping -c 2 8.8.8.8", instruction)
+
+[<Fact>]
+let ``HEALTHCHECK with multiple options`` () =
+    let options =
+        [
+            2u |> Seconds |> Timeout
+            45u |> Seconds |> StartPeriod
+        ]
+    let instruction = Healthcheck (HealthcheckCmd (ShellCommand ("ping -c 2 8.8.8.8"), options)) |> printInstruction
+    Assert.Equal ("HEALTHCHECK --timeout=2s --start-period=45s CMD ping -c 2 8.8.8.8", instruction)
+
+[<Fact>]
+let ``SHELL with args`` () =
+    let instruction = Shell ("/bin/sh", ["-c"]) |> printInstruction
+    Assert.Equal ("""SHELL ["/bin/sh", "-c"]""", instruction)
