@@ -2,8 +2,8 @@ module DockerfileTests
 
 open System
 open Xunit
-open FSharp.Docker
-open FSharp.Docker.Dockerfile
+open FSharp.Text.Docker
+open FSharp.Text.Docker.Dockerfile
 
 [<Fact>]
 let ``Build a dockerfile`` () =

@@ -1,4 +1,4 @@
-namespace FSharp.Docker
+namespace FSharp.Text.Docker
 
 module Dockerfile =
 

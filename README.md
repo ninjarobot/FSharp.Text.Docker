@@ -1,4 +1,4 @@
-FSharp.Docker
+FSharp.Text.Docker
 ========
 
 Interact with docker with the type safety of the F# language.

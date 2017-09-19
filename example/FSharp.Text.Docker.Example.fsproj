@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\FSharp.Docker.fsproj" />
+    <ProjectReference Include="..\src\FSharp.Text.Docker.fsproj" />
   </ItemGroup>
 
 </Project>

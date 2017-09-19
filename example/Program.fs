@@ -1,8 +1,8 @@
-﻿namespace FSharp.Docker.Example
+﻿namespace FSharp.Text.Docker.Example
 
 open System
-open FSharp.Docker
-open FSharp.Docker.Dockerfile
+open FSharp.Text.Docker
+open FSharp.Text.Docker.Dockerfile
 
 
 module Program =
