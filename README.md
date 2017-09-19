@@ -3,6 +3,8 @@ FSharp.Text.Docker
 
 Interact with docker with the type safety of the F# language.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/w2lho84ksd75mh7g?svg=true)](https://ci.appveyor.com/project/ninjarobot/fsharp-docker)
+
 ### Define a dockerfile
 
 A dockerfile can be built using a set of types for all of the supported
