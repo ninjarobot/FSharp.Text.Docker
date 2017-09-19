@@ -1,0 +1,3 @@
+source https://nuget.org/api/v2
+github ninjarobot/FSharp.Text.Docker src/Dockerfile.fs
+nuget FSharp.Core
