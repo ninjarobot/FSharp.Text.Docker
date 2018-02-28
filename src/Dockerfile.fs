@@ -1,5 +1,9 @@
 namespace FSharp.Text.Docker
 
+#if FABLE
+open Fable.Core
+open Fable.Import
+#endif
 module Dockerfile =
 
     type Command =
@@ -60,11 +64,15 @@ module Dockerfile =
         | Healthcheck of Healthcheck
 
     let private stringsToJsonArray (strings:string list) =
-        use ms = new System.IO.MemoryStream ()
         let arrStr = strings |> Array.ofList
+#if FABLE
+        JsInterop.toJson arrStr
+#else
         let serializer = System.Runtime.Serialization.Json.DataContractJsonSerializer (typedefof<string []>)
+        use ms = new System.IO.MemoryStream ()
         serializer.WriteObject (ms, arrStr)
         System.Text.Encoding.UTF8.GetString (ms.ToArray ())
+#endif
 
     let private stringsToQuotedArray (strings:string list) =
         strings |> List.map (sprintf "\"%s\"") |> String.concat ", " |> sprintf "[%s]"
@@ -73,7 +81,12 @@ module Dockerfile =
         if isNull (s) then
             false
         else
-            System.Linq.Enumerable.Any(s, fun c -> System.Char.IsWhiteSpace(c))
+#if FABLE
+            let re = JS.RegExp.Create("/\s/")
+            re.test(s)
+#else
+            System.Linq.Enumerable.Any (s, fun c -> System.Char.IsWhiteSpace (c))
+#endif
 
     let rec printInstruction (instruction:Instruction) =
         match instruction with
