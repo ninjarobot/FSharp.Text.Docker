@@ -42,6 +42,7 @@ module Dockerfile =
         | HealthcheckCmd of Cmd:Command * HealthcheckOption list
         | HealthcheckNone
 
+    /// Instructions in a Dockerfile
     type Instruction =
         | From of Image:string * Tag:string option * Name:string option
         | Run of Command
@@ -88,6 +89,7 @@ module Dockerfile =
             System.Linq.Enumerable.Any (s, fun c -> System.Char.IsWhiteSpace (c))
 #endif
 
+    /// Prints a Docker instruction to a string.
     let rec printInstruction (instruction:Instruction) =
         match instruction with
         | From (img, Some (tag), Some(name)) -> sprintf "FROM %s:%s AS %s" img tag name
