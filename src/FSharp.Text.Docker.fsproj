@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
-    <PackageVersion>1.0.0</PackageVersion>
-    <PackageLicenseUrl>https://github.com/ninjarobot/FSharp.Text.Docker/blob/master/LICENSE</PackageLicenseUrl>
-    <Copyright>Copyright (c) 2017-2018 Dave Curylo</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>Copyright (c) 2017-2021 Dave Curylo</Copyright>
     <Description>Building Dockerfiles from F#.</Description>
     <PackageProjectUrl>https://github.com/ninjarobot/FSharp.Text.Docker</PackageProjectUrl>
     <PackageTags>docker;fsharp</PackageTags>
@@ -11,6 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dockerfile.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="5.0.0" />
