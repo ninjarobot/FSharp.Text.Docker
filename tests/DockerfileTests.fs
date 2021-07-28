@@ -53,7 +53,7 @@ let ``RUN exec with args`` () =
 [<Fact>]
 let ``RUN exec with quotes in args`` () =
     let instruction = Run (Exec ("apt-get", ["install"; "-y"; """something"quoted with \ slashes / in it"""])) |> printInstruction
-    Assert.Equal ("""RUN ["apt-get","install","-y","something\"quoted with \\ slashes \/ in it"]""", instruction)
+    Assert.Equal ("""RUN ["apt-get","install","-y","something\"quoted with \\ slashes / in it"]""", instruction)
 
 [<Fact>]
 let ``RUN shell command`` () =
@@ -73,7 +73,7 @@ let ``CMD exec with args`` () =
 [<Fact>]
 let ``CMD exec with quotes in args`` () =
     let instruction = Cmd (Exec ("mono", ["myapp.exe"; """something"quoted with \ slashes / in it"""])) |> printInstruction
-    Assert.Equal ("""CMD ["mono","myapp.exe","something\"quoted with \\ slashes \/ in it"]""", instruction)
+    Assert.Equal ("""CMD ["mono","myapp.exe","something\"quoted with \\ slashes / in it"]""", instruction)
 
 [<Fact>]
 let ``CMD shell command`` () =

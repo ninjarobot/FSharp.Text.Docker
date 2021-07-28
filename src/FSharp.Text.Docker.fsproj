@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
     <PackageVersion>1.0.0</PackageVersion>
     <PackageLicenseUrl>https://github.com/ninjarobot/FSharp.Text.Docker/blob/master/LICENSE</PackageLicenseUrl>
     <Copyright>Copyright (c) 2017-2018 Dave Curylo</Copyright>
@@ -13,6 +13,9 @@
     <Compile Include="Dockerfile.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageReference Update="FSharp.Core" Version="5.0.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
-</Project>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Text.Json" Version="5.0.1" />
+  </ItemGroup></Project>

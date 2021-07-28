@@ -69,10 +69,8 @@ module Dockerfile =
 #if FABLE
         JsInterop.toJson arrStr
 #else
-        let serializer = System.Runtime.Serialization.Json.DataContractJsonSerializer (typedefof<string []>)
-        use ms = new System.IO.MemoryStream ()
-        serializer.WriteObject (ms, arrStr)
-        System.Text.Encoding.UTF8.GetString (ms.ToArray ())
+        let serializeOptions = System.Text.Json.JsonSerializerOptions(Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
+        System.Text.Json.JsonSerializer.Serialize (arrStr, serializeOptions)
 #endif
 
     let private stringsToQuotedArray (strings:string list) =
