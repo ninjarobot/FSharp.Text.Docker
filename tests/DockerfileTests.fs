@@ -166,6 +166,11 @@ let ``COPY multiple sources with whitespace`` () =
     Assert.Equal ("""COPY ["path to/source", "some/other source", "/dest/in/image"]""", instruction)
 
 [<Fact>]
+let ``COPY from named layer`` () =
+    let instruction = Copy (SingleSource ("path/to/source"), "/dest/in/image", Some (BuildStage.Name "builder")) |> printInstruction
+    Assert.Equal ("COPY --from=builder path/to/source /dest/in/image", instruction)
+
+[<Fact>]
 let ``ENTRYPOINT exec no args`` () =
     let instruction = Entrypoint (Exec ("/bin/bash", [])) |> printInstruction
     Assert.Equal ("""ENTRYPOINT ["/bin/bash"]""", instruction)

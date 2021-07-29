@@ -21,6 +21,10 @@ module Dockerfile =
     type BuildStage = 
         | Name of string
         | Index of int
+        member this.AsString =
+            match this with
+            | Name n -> n
+            | Index i -> string i
 
     type Signal =
         | Sigquit
@@ -133,19 +137,32 @@ module Dockerfile =
                 |> sprintf "ADD %s"
             else
                 sprintf "ADD %s %s" (sources |> String.concat " ") dest
-        | Copy (SingleSource (source), dest, from) ->
+        | Copy (SingleSource (source), dest, None) ->
             if source |> stringContainsWhitepace || dest |> stringContainsWhitepace then
                 [source; dest] |> stringsToQuotedArray
                 |> sprintf "COPY %s"
             else
                 sprintf "COPY %s %s" source dest
-        | Copy (MultipleSources (sources), dest, from) ->
+        | Copy (SingleSource (source), dest, Some (from)) ->
+            if source |> stringContainsWhitepace || dest |> stringContainsWhitepace then
+                [source; dest] |> stringsToQuotedArray
+                |> sprintf "COPY --from=%s %s" from.AsString
+            else
+                sprintf "COPY --from=%s %s %s" from.AsString source dest
+        | Copy (MultipleSources (sources), dest, None) ->
             if sources |> List.exists(stringContainsWhitepace) || dest |> stringContainsWhitepace then
                 sources@[dest] |> stringsToQuotedArray
                 |> sprintf "COPY %s"
             else
                 sources@[dest] |> String.concat " "
                 |> sprintf "COPY %s"
+        | Copy (MultipleSources (sources), dest, Some(from)) ->
+            if sources |> List.exists(stringContainsWhitepace) || dest |> stringContainsWhitepace then
+                sources@[dest] |> stringsToQuotedArray
+                |> sprintf "COPY --from=%s %s" from.AsString
+            else
+                sources@[dest] |> String.concat " "
+                |> sprintf "COPY --from=%s %s" from.AsString
         | Entrypoint (Exec (executable, args)) -> 
             sprintf "ENTRYPOINT %s" (executable::args |> stringsToQuotedArray)
         | Entrypoint (ShellCommand (command)) ->
