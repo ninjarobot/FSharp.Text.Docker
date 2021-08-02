@@ -212,3 +212,99 @@ module Dockerfile =
     /// Concatenates a list of Dockerfile instructions into a single Dockerfile
     let buildDockerfile (instructions:Instruction list) =
         instructions |> List.map (printInstruction) |> String.concat System.Environment.NewLine
+
+module Builders =
+    type DockerfileSpec =
+        { Instructions : Dockerfile.Instruction list }
+        member this.Build () = Dockerfile.buildDockerfile this.Instructions
+        member this.Stage : string option =
+            let fromAs = function
+                | Dockerfile.From (_, _, Some buildStage) -> Some buildStage
+                | _ -> None
+            this.Instructions |> List.choose fromAs |> List.tryHead
+            
+    type DockerfileBuilder () =
+        member _.Bind (config:DockerfileSpec, fn) : DockerfileSpec = fn config
+        member _.Combine (a:DockerfileSpec, b:DockerfileSpec) = { Instructions = a.Instructions @ b.Instructions }
+        member _.Delay (fn:unit -> DockerfileSpec) = fn ()
+        member _.Yield _ = { Instructions = [] }
+        member _.YieldFrom (config:DockerfileSpec) = config
+        member _.Zero _ = { Instructions = [] }
+        [<CustomOperation "from">]
+        member _.From (config:DockerfileSpec, baseImage:string) =
+            let instruction =
+                match baseImage.Split [|':'|] with
+                | [| name |] -> Dockerfile.From(name, None, None)
+                | [| name; version |] -> Dockerfile.From(name, Some version, None)
+                | _ -> invalidArg "baseImage" "Image should be of form 'name:version'"
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "from_stage">]
+        member _.FromStage (config:DockerfileSpec, baseImage:string, stage:string) =
+            let instruction =
+                match baseImage.Split [|':'|] with
+                | [| name |] -> Dockerfile.From(name, None, Some stage)
+                | [| name; version |] -> Dockerfile.From(name, Some version, Some stage)
+                | _ -> invalidArg "baseImage" "Image should be of form 'name:version'"
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "cmd">]
+        member _.CmdShellCommand (config:DockerfileSpec, shellCmd:string) =
+            let instruction = Dockerfile.Cmd(Dockerfile.ShellCommand shellCmd)
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "copy">]
+        member _.Copy (config:DockerfileSpec, source:string, dest:string) =
+            let instruction = Dockerfile.Copy(Dockerfile.SingleSource source, dest, None)
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "copy_from">]
+        member _.CopyFrom (config:DockerfileSpec, stage:string, source:string, dest:string) =
+            let instruction = Dockerfile.Copy(Dockerfile.SingleSource source, dest, Some (Dockerfile.BuildStage.Name stage))
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "env">]
+        member _.Env (config:DockerfileSpec, envVar:string * string) =
+            let instruction = Dockerfile.Env (Dockerfile.Dictionary ([envVar] |> Map.ofList))
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        member _.Env (config:DockerfileSpec, envVars:Map<string, string>) =
+            let instruction = Dockerfile.Env (Dockerfile.KeyVal.Dictionary envVars)
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "env_vars">]
+        member _.EnvVars (config:DockerfileSpec, envVars:(string * string) list) =
+            let instruction = Dockerfile.Env (Dockerfile.KeyVal.Dictionary (envVars |> Map.ofList))
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "expose">]
+        member _.Expose (config:DockerfileSpec, port:int) =
+            let instruction = Dockerfile.Expose [(uint16 port)]
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        member _.Expose (config:DockerfileSpec, ports:int list) =
+            let instruction = Dockerfile.Expose (ports |> List.map uint16)
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "run_exec">]
+        member _.RunExec (config:DockerfileSpec, exec:string, args:string list) =
+            let instruction = Dockerfile.Run(Dockerfile.Exec (exec, args))
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        member _.RunExec (config:DockerfileSpec, exec:string, args:string) =
+            let instruction = Dockerfile.Run(Dockerfile.Exec (exec, List.ofArray (args.Split null)))
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "run">]
+        member _.RunShell (config:DockerfileSpec, shellCmd:string) =
+            let instruction = Dockerfile.Run(Dockerfile.ShellCommand shellCmd)
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "user">]
+        member _.User (config:DockerfileSpec, user:string) =
+            let instruction =
+                match user.Split [|':'|] with
+                | [| username |] -> Dockerfile.User(username, None)
+                | [| username; group |] -> Dockerfile.User(username, Some group)
+                | _ -> invalidArg "user" "User should be of form 'username:group'"
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "volume">]
+        member _.Volume (config:DockerfileSpec, volume:string) =
+            let instruction = Dockerfile.Volume [volume]
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "add_volumes">]
+        member _.AddVolumes (config:DockerfileSpec, volumes:string list) =
+            let instruction = Dockerfile.Volume volumes
+            { config with Instructions = config.Instructions @ [ instruction ] }
+        [<CustomOperation "workdir">]
+        member _.Workdir (config:DockerfileSpec, workdir:string) =
+            let instruction = Dockerfile.WorkDir workdir
+            { config with Instructions = config.Instructions @ [ instruction ] }
+    let dockerfile = DockerfileBuilder ()
