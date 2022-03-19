@@ -5,6 +5,7 @@
     <Copyright>Copyright (c) 2017-2021 Dave Curylo</Copyright>
     <Description>Building Dockerfiles from F#.</Description>
     <PackageProjectUrl>https://github.com/ninjarobot/FSharp.Text.Docker</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>docker;fsharp</PackageTags>
     <Authors>dcurylo</Authors>
   </PropertyGroup>
@@ -13,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="../LICENSE" Pack="true" PackagePath="" />
+    <None Include="../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net6.0' ">
     <PackageReference Update="FSharp.Core" Version="5.0.0" />

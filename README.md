@@ -16,28 +16,34 @@ A list of instructions is passed to the `buildDockerfile` command, which will
 return a string representation of that Dockerfile.
 
 ```fsharp
-[
-    From ("debian", Some("stretch-slim"), None)
-    Run (Exec ("apt-get", ["update"]))
-    Run (Exec ("apt-get", ["install"; "-y"; "wget"]))
-    Env (KeyValuePair("LANG", "C.UTF-8"))
-    Copy (SingleSource("."), "/app", None)
-    WorkDir ("/app")
-    Cmd (ShellCommand ("wget https://github.com/fsharp/fsharp/archive/4.1.25.tar.gz"))
-]
-|> Dockerfile.buildDockerfile
+#r "nuget: FSharp.Text.Docker"
+open FSharp.Text.Docker.Builders
+
+let dockerSpecBuilder = dockerfile {
+    from_stage "mcr.microsoft.com/dotnet/sdk:5.0.302" "builder"
+    run_exec "apt-get" "install -y wget"
+    run "dotnet new console -lang F# -n foo"
+    workdir "foo"
+    run "dotnet build -c Release -o app"
+    from "mcr.microsoft.com/dotnet/runtime:5.0.8"
+    expose 80
+    copy_from "builder" "/path/to/source/myApp.dll" "/path/to/dest"
+    cmd "dotnet /path/to/dest/myApp.dll"
+}
+dockerSpecBuilder.Build() |> System.Console.WriteLine
 ```
 
 The output can be saved as a Dockerfile like the one below.
 
 ```dockerfile
-FROM debian:stretch-slim
-RUN ["apt-get","update"]
+FROM mcr.microsoft.com/dotnet/sdk:5.0.302 AS builder
 RUN ["apt-get","install","-y","wget"]
-ENV LANG C.UTF-8
-COPY . /app
-WORKDIR /app
-CMD wget https://github.com/fsharp/fsharp/archive/4.1.25.tar.gz
+RUN dotnet new console -lang F# -n foo
+WORKDIR foo
+RUN dotnet build -c Release -o app
+FROM mcr.microsoft.com/dotnet/runtime:5.0.8
+EXPOSE 80
+COPY --from=builder /path/to/source
 ```
 
 With the full F# language, it becomes relatively simple to use complex logic
