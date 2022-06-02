@@ -3,7 +3,7 @@ name: dotnet pack and publish
 on:
   release:
     types: [released]
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   publish:
