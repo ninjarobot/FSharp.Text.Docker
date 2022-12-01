@@ -12,6 +12,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dockerfile.fs" />
