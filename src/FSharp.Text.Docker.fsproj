@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Copyright>Copyright (c) 2017-2021 Dave Curylo</Copyright>
+    <Copyright>Copyright (c) 2017-2022 Dave Curylo</Copyright>
     <Description>Building Dockerfiles from F#.</Description>
     <PackageProjectUrl>https://github.com/ninjarobot/FSharp.Text.Docker</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -20,7 +20,7 @@
     <PackageReference Update="FSharp.Core" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Text.Json" Version="5.0.1" />
