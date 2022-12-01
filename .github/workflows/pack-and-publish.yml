@@ -21,6 +21,4 @@ jobs:
       - name: Build and pack
         run: VERSION=${GITHUB_REF##*/} dotnet build -warnaserror --no-restore -o . -c Release
       - name: Publish nuget package
-        run: dotnet nuget push FSharp.Text.Docker.*.nupkg -s https://nuget.org -k ${{ secrets.NUGET_API_KEY }}
-      - name: Publish symbols package
-        run: dotnet nuget push FSharp.Text.Docker.*.snupkg -s https://nuget.org -k ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push FSharp.Text.Docker.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
