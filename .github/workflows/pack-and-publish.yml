@@ -16,12 +16,10 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 6.0.403
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: VERSION=${GITHUB_REF##*/} dotnet build -warnaserror --no-restore -o . -c Release
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --verbosity normal
+      - name: Build and pack
+        run: VERSION=${GITHUB_REF##*/} dotnet build -warnaserror --no-restore -o . -c Release
       - name: Publish nuget package
         run: dotnet nuget push FSharp.Text.Docker.*.nupkg -s https://nuget.org -k ${{ secrets.NUGET_API_KEY }}
       - name: Publish symbols package
