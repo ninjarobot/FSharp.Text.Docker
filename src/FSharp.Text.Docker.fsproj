@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Copyright (c) 2017-2022 Dave Curylo</Copyright>
     <Description>Building Dockerfiles from F#.</Description>
@@ -8,6 +8,10 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>docker;fsharp</PackageTags>
     <Authors>dcurylo</Authors>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dockerfile.fs" />
@@ -16,12 +20,16 @@
     <None Include="../LICENSE" Pack="true" PackagePath="" />
     <None Include="../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net6.0' ">
+  <!-- Set minimum dependency for FSharp.Core instead of using SDK dependency -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Update="FSharp.Core" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="5.0.1" />
   </ItemGroup>
+  <!-- Enable SourceLink and deterministic builds -->
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Text.Json" Version="5.0.1" />
-  </ItemGroup></Project>
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup> 
+</Project>
