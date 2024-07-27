@@ -15,7 +15,8 @@ let ``Simple builder`` () =
         from "mcr.microsoft.com/dotnet/runtime:5.0.8"
         expose 80
         copy_from "builder" "/path/to/source/myApp.dll" "/path/to/dest"
-        cmd "dotnet /path/to/dest/myApp.dll"
+        entrypoint "dotnet"
+        cmd "/path/to/dest/myApp.dll"
     }
     let spec = myDockerfile.Build ()
     let expected = """
@@ -27,7 +28,8 @@ RUN dotnet build -c Release -o app
 FROM mcr.microsoft.com/dotnet/runtime:5.0.8
 EXPOSE 80
 COPY --from=builder /path/to/source/myApp.dll /path/to/dest
-CMD dotnet /path/to/dest/myApp.dll
+ENTRYPOINT dotnet
+CMD /path/to/dest/myApp.dll
 """
     Assert.Equal (expected.Trim(), spec)
 
