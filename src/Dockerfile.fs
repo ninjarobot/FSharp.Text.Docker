@@ -251,8 +251,8 @@ module Builders =
             let instruction = Dockerfile.Cmd(Dockerfile.ShellCommand shellCmd)
             { config with Instructions = config.Instructions @ [ instruction ] }
         [<CustomOperation "entrypoint">]
-        member _.Entrypoint(config: DockerfileSpec, shellCmd: string) =
-            let instruction = Dockerfile.Entrypoint(Dockerfile.ShellCommand shellCmd)
+        member _.Entrypoint(config: DockerfileSpec,  exec:string, args:string list) =
+            let instruction = Dockerfile.Entrypoint(Dockerfile.Exec (exec, args))
             { config with Instructions = config.Instructions @ [ instruction ] }
         [<CustomOperation "copy">]
         member _.Copy (config:DockerfileSpec, source:string, dest:string) =
