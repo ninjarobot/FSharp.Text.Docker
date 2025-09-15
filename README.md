@@ -4,7 +4,7 @@ FSharp.Text.Docker
 Interact with docker with the type safety of the F# language.
 
 [![Build and Test](https://github.com/ninjarobot/FSharp.Text.Docker/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/ninjarobot/FSharp.Text.Docker/actions/workflows/build-and-test.yml)
-[![FSharp.Text.Docker on Nuget](https://buildstats.info/nuget/FSharp.Text.Docker)](https://www.nuget.org/packages/FSharp.Text.Docker/)
+[![FSharp.Text.Docker on Nuget](https://img.shields.io/nuget/v/FSharp.Text.Docker)](https://www.nuget.org/packages/FSharp.Text.Docker/)
 
 ### Define a dockerfile
 

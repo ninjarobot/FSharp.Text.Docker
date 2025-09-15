@@ -2,7 +2,7 @@ name: dotnet pack and publish
 
 on:
   release:
-    types: [released]
+    types: [ released ]
     branches: [ master ]
 
 jobs:
@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5.0.0
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v5.0.0
         with:
-          dotnet-version: 6.0.403
+          dotnet-version: 9.0.305
       - name: Test
-        run: dotnet test --verbosity normal
+        run: dotnet test
       - name: Build and pack
         run: VERSION=${GITHUB_REF##*/} dotnet build -warnaserror --no-restore -o . -c Release
       - name: Publish nuget package
