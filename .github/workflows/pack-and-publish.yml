@@ -19,6 +19,6 @@ jobs:
       - name: Test
         run: dotnet test
       - name: Build and pack
-        run: VERSION=${GITHUB_REF##*/} dotnet build -warnaserror --no-restore -o . -c Release
+        run: VERSION=${GITHUB_REF##*/} dotnet build src/FSharp.Text.Docker.fsproj -warnaserror --no-restore -o . -c Release
       - name: Publish nuget package
         run: dotnet nuget push FSharp.Text.Docker.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
